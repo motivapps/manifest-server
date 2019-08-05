@@ -6,7 +6,7 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const plaid = require('plaid');
-const { sequelize } = require('./models');
+const { sequelize, models } = require('./models/index');
 
 /**
  * express required to aid in in handeling request made to server
@@ -65,7 +65,7 @@ app.post('/get_access_token', (req, res, next) => {
 
 // const PORT = 8080;
 
-sequelize.sync().then(() => {
+sequelize.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
     console.log(`Your app is manifesting on port ${process.env.PORT}!`);
   });
