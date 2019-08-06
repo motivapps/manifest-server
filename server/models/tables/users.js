@@ -5,7 +5,8 @@ const user = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       unique: true
     },
-    "banking_token": DataTypes.STRING,
+    "access_token": DataTypes.STRING,
+    "item_id": DataTypes.STRING,
     "session_token": DataTypes.STRING,
     "totalSaved": DataTypes.INTEGER,
     "transfer_schedule": {
