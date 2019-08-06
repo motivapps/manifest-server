@@ -25,7 +25,7 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, '../dist')));
 app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(session({ secret: 'anything' }));
 // app.use(passport.initialize());
 // app.use(passport.session());
@@ -39,11 +39,11 @@ let ACCESS_TOKEN = null;
 let PUBLIC_TOKEN = null;
 
 const client = new plaid.Client(
-  process.env.PLAID_CLIENT_ID,
-  process.env.PLAID_SECRET,
-  process.env.PLAID_PUBLIC_KEY,
+  "5d40763fc2c21f00115793fe",
+  "6dd65e4d6b8b3d6884cc4c4f5add6a",
+  "a35fead643ab95153802609fa5c0a2",
   plaid.environments.sandbox,
-  {version: '2019-08-05'}
+  {version: '2018-05-22'}
 );
 
 app.post('/get_access_token', (req, res, next) => {
@@ -63,8 +63,6 @@ app.post('/get_access_token', (req, res, next) => {
     });
   });
 });
-
-// const PORT = 8080;
 
 sequelize.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
