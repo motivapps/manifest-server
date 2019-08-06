@@ -55,6 +55,7 @@ app.post('/get_access_token', (req, res, next) => {
     ACCESS_TOKEN = tokenResponse.access_token;
     ITEM_ID = tokenResponse.item_id;
     console.log(JSON.stringify(tokenResponse));
+    // ADD ACCESS_TOKEN AND ITEM_ID TO DATABASE HERE
     res.json({
       access_token: ACCESS_TOKEN,
       item_id: ITEM_ID,
