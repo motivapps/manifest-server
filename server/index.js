@@ -6,10 +6,13 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const plaid = require('plaid');
+const { sequelize, models } = require('./models/index');
+const moment = require('moment');
 const { db, models: { 
     Game, Goal, Relapse, Transaction, UsersGame, Vice, User
   }
 } = require('./models/index');
+
 
 
 /**
@@ -45,9 +48,9 @@ let ACCESS_TOKEN = null;
 let PUBLIC_TOKEN = null;
 
 const client = new plaid.Client(
-  "5d40763fc2c21f00115793fe",
-  "6dd65e4d6b8b3d6884cc4c4f5add6a",
-  "a35fead643ab95153802609fa5c0a2",
+  process.env.PLAID_CLIENT_ID,
+  process.env.PLAID_SECRET,
+  process.env.PLAID_PUBLIC_KEY,
   plaid.environments.sandbox,
   {version: '2018-05-22'}
 );
@@ -75,6 +78,7 @@ app.post('/get_access_token', (req, res, next) => {
     }
     ACCESS_TOKEN = tokenResponse.access_token;
     ITEM_ID = tokenResponse.item_id;
+    axios.get('http://localhost/auth');
     console.log(JSON.stringify(tokenResponse));
     // ADD ACCESS_TOKEN AND ITEM_ID TO DATABASE HERE
     res.json({
@@ -85,6 +89,37 @@ app.post('/get_access_token', (req, res, next) => {
   });
 });
 
+app.get('/auth', (req, res) => {
+  client.getAuth(ACCESS_TOKEN, (err, authResponse) => {
+    if (err) {
+      console.error(err);
+    }
+    console.log(authResponse);
+    res.json({ error: null, auth: authResponse });
+  });
+});
+
+app.post('/transaction_hook', (req, res) => {
+  console.log(req);
+  // check if req.body.webhook_code is DEFAULT_UPDATE
+  // if it is, make a request to Plaid for transaction data
+  // if (req.body.webhook_code === 'DEFAULT_UPDATE') {
+  const startDate = moment().subtract(1, 'days').format('YYYY-MM-DD');
+  const endDate = moment().format('YYYY-MM-DD');
+  client.getTransactions(ACCESS_TOKEN, startDate, endDate, { offset: 0 }, (err, transactionRes) => {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log(transactionRes);
+      // DATABASE WORK HERE
+      // Parse this data, send suspicious transactions to the database
+      res.json({ transactions: transactionRes });
+    }
+  });
+  // }
+});
+
+sequelize.sync({ force: false }).then(() => {
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
     console.log(`Your app is manifesting on port ${process.env.PORT}!`);
