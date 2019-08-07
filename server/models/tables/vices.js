@@ -1,12 +1,10 @@
-const vices = (sequelize, DataTypes) => {
-  const Vices = sequelize.define('vices', {
-      "vice": {
-        type: DataTypes.ENUM,
-        values: ['smoking', 'drinking', 'coffee', 'fast food', 'gambling', 'shopping'],
-      },
-    }, { sequelize }
-  )
-  return Vices;
-}
+const Sequelize = require('sequelize');
+const db = require('../db');
 
-module.exports = vices;
+module.exports = db.define('vices', {
+    "vice": {
+      type: Sequelize.ENUM,
+      values: ['smoking', 'drinking', 'coffee', 'fast food', 'gambling', 'shopping'],
+    },
+  }, { db }
+);

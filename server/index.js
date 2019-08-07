@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const plaid = require('plaid');
 const { db, models: { 
-    /** Games, Goals, Relapses, Transactions, UsersGames, Vices  */ User
+    Game, Goal, Relapse, Transaction, UsersGame, Vice, User
   }
 } = require('./models/index');
 
