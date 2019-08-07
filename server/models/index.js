@@ -1,17 +1,9 @@
-const Sequelize = require('sequelize');
+const User = require('./tables/users');
+const db = require('./db');
 
-const sequelize = new Sequelize(
-  process.env.DATABASE, 
-  process.env.DB_USERNAME, 
-  process.env.DB_PASSWORD, 
-  {
-    host: process.env.HOST,
-    dialect: 'postgres',
-  }
-)
 
-sequelize
-  .authenticate()
+
+db.authenticate()
   .then(() => {
     console.log('Connection has been established successfully.');
   })
@@ -19,16 +11,21 @@ sequelize
     console.error('Unable to connect to the database:', err);
   });
 
+// const imports = {
+//   UsersModel: sequelize.import('./tables/users'),
+//   GoalsModel: sequelize.import('./tables/goals'),
+//   VicesModel: sequelize.import('./tables/vices'),
+//   RelapsesModel: sequelize.import('./tables/relapses'),
+//   TransactionsModel: sequelize.import('./tables/transactions'),
+//   GamesModel: sequelize.import('./tables/games'),
+//   UsersGamesModel: sequelize.import('./tables/users_games'),
+// }
+
 const models = {
-  Users: sequelize.import('./tables/users'),
-  Goals: sequelize.import('./tables/goals'),
-  Vices: sequelize.import('./tables/vices'),
-  Relapses: sequelize.import('./tables/relapses'),
-  Transactions: sequelize.import('./tables/transactions'),
-  Games: sequelize.import('./tables/games'),
-  UsersGames: sequelize.import('./tables/users_games'),
+  User,
+
 }
 
-module.exports = { sequelize, models }
+module.exports = { db, models }
 
 // export default models;

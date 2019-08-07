@@ -1,23 +1,20 @@
-const user = (sequelize, DataTypes) => {
-  const User = sequelize.define('users',{
-    "full_name": DataTypes.STRING,
-    "email": {
-      type: DataTypes.STRING,
-      unique: true
-    },
-    "access_token": DataTypes.STRING,
-    "item_id": DataTypes.STRING,
-    "session_token": DataTypes.STRING,
-    "totalSaved": DataTypes.INTEGER,
-    "transfer_schedule": {
-      type: DataTypes.ENUM,
-      values: ['a', 'b', 'c']
-    },
-    "games": DataTypes.INTEGER,
-    }, { sequelize }
-  )
+const Sequelize = require('sequelize');
+const db = require('../db');
 
-  return user 
-};
-
-module.exports = user;
+module.exports = db.define('users',{
+  "full_name": Sequelize.STRING,
+  "email": {
+    type: Sequelize.STRING,
+    unique: true
+  },
+  "access_token": Sequelize.STRING,
+  "item_id": Sequelize.STRING,
+  "session_token": Sequelize.STRING,
+  "totalSaved": Sequelize.INTEGER,
+  "transfer_schedule": {
+    type: Sequelize.ENUM,
+    values: ['a', 'b', 'c']
+  },
+  "games": Sequelize.INTEGER,
+  }, { db }
+);
