@@ -13,6 +13,11 @@ const { db, models: {
   }
 } = require('./models/index');
 
+/**
+ * load test users, feel free to comment out
+ */
+const { loadData, testUsers } = require('../test_data');
+loadData(testUsers);
 
 
 /**
