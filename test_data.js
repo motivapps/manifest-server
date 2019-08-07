@@ -1,4 +1,7 @@
-const { models: { User } } = require("./server/models/index.js");
+const { db, models: {
+  Game, Goal, Relapse, Transaction, UsersGame, Vice, User
+}
+} = require("./server/models/index.js");
 
 const users = [{
   name: 'Galen Housego',
