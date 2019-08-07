@@ -1,20 +1,18 @@
-const transactions = (sequelize, DataTypes) => {
-  const Transaction = sequelize.define('relapses', {
+const Sequelize = require('sequelize');
+const db = require('../db');
+
+module.exports = db.define('relapses', {
     "id_user": {
-      type: DataTypes.INTEGER,
+      type: Sequelize.INTEGER,
       model: "users",
       key: "id",
     },
     "status": {
-      type: DataTypes.ENUM,
+      type: Sequelize.ENUM,
       values: ['pending', 'dismissed', 'else'],
     },
-    "name": DataTypes.STRING,
-    "day": DataTypes.DATE,
-    "amount": DataTypes.DECIMAL,
-  }, { sequelize }
-  )
-  return Transaction;
-}
-
-module.exports = transactions;
+    "name": Sequelize.STRING,
+    "day": Sequelize.DATE,
+    "amount": Sequelize.DECIMAL,
+  }, { db }
+);

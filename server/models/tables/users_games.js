@@ -1,18 +1,16 @@
-const usersGames = (sequelize, DataTypes) => {
-  const UsersGames = sequelize.define('users_games', {
+const Sequelize = require('sequelize');
+const db = require('../db');
+
+module.exports = db.define('users_games', {
     "id_user": {
-      type: DataTypes.INTEGER,
+      type: Sequelize.INTEGER,
       model: "users",
       key: "id",
     },
     "id_game": {
-      type: DataTypes.INTEGER,
+      type: Sequelize.INTEGER,
       model: "games",
       key: "id",
     }
-  }, { sequelize }
-  )
-  return UsersGames;
-}
-
-module.exports = usersGames;
+  }, { db }
+);

@@ -1,7 +1,22 @@
 const User = require('./tables/users');
+const Game = require('./tables/users');
+const Goal = require('./tables/users');
+const Relapse = require('./tables/users');
+const Transaction = require('./tables/users');
+const UserGame = require('./tables/users');
+const Vice = require('./tables/users');
+
 const db = require('./db');
 
-
+const models = {
+  User,
+  Game,
+  Goal,
+  Relapse,
+  Transaction,
+  UserGame,
+  Vice
+};
 
 db.authenticate()
   .then(() => {
@@ -11,21 +26,5 @@ db.authenticate()
     console.error('Unable to connect to the database:', err);
   });
 
-// const imports = {
-//   UsersModel: sequelize.import('./tables/users'),
-//   GoalsModel: sequelize.import('./tables/goals'),
-//   VicesModel: sequelize.import('./tables/vices'),
-//   RelapsesModel: sequelize.import('./tables/relapses'),
-//   TransactionsModel: sequelize.import('./tables/transactions'),
-//   GamesModel: sequelize.import('./tables/games'),
-//   UsersGamesModel: sequelize.import('./tables/users_games'),
-// }
-
-const models = {
-  User,
-
-}
 
 module.exports = { db, models }
-
-// export default models;

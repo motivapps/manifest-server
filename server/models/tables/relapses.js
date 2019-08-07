@@ -1,20 +1,18 @@
-const relapses = (sequelize, DataTypes) => {
-  const Relapse = sequelize.define('relapses', {
+const Sequelize = require('sequelize');
+const db = require('../db');
+
+module.exports = sequelize.define('relapses', {
     "id_user": {
-      type: DataTypes.INTEGER,
+      type: Sequelize.INTEGER,
       model: "users",
       key: "id",
     },
     "id_goal": {
-      type: DataTypes.INTEGER,
+      type: Sequelize.INTEGER,
       model: "goal",
       key: "id",
     },
-    "day": DataTypes.DATE,
-    "cost": DataTypes.DECIMAL,
-  }, { sequelize }
-  )
-  return Relapse;
-}
-
-module.exports = relapses;
+    "day": Sequelize.DATE,
+    "cost": Sequelize.DECIMAL,
+  }, { db }
+);

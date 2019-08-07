@@ -1,9 +1,7 @@
-const games = (sequelize, DataTypes) => {
-  const Game = sequelize.define('games', {
-    "game": DataTypes.STRING,
-  }, { sequelize })
-  
-  return Game;
-}
+const Sequelize = require('sequelize');
+const db = require('../db');
 
-module.exports = games;
+module.exports = db.define('games', {
+    "game": Sequelize.STRING,
+  }, { db }
+);
