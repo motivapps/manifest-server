@@ -60,12 +60,12 @@ app.get('/users', (req, res) => {
 });
 
 app.post('/users', (req, res) => {
-  const { body: { full_name } } = req;
-  User.findAll({ where: { full_name } }).then(data => {
-      // if (data){
-
-      // }
-      return User.create({ full_name }); 
+  const { body: { name, email, picture } } = req;
+  User.findAll({ where: { email } }).then(data => {
+      return data.length 
+      // add reddirect to signup
+      ? res.send(300)
+      : User.create({ name, email, picture }); 
     })
     .catch(err => console.err(err));
 });
