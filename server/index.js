@@ -119,7 +119,6 @@ app.post('/transaction_hook', (req, res) => {
   // }
 });
 
-sequelize.sync({ force: false }).then(() => {
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
     console.log(`Your app is manifesting on port ${process.env.PORT}!`);
