@@ -8,6 +8,12 @@ const passport = require('passport');
 const plaid = require('plaid');
 const { sequelize, models } = require('./models/index');
 const moment = require('moment');
+const { db, models: { 
+    /** Games, Goals, Relapses, Transactions, UsersGames, Vices  */ User
+  }
+} = require('./models/index');
+
+
 
 /**
  * express required to aid in in handeling request made to server
@@ -28,6 +34,8 @@ app.use(express.static(path.join(__dirname, '../dist')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(session({ secret: 'anything' }));
+
+// // Initialize Passport
 // app.use(passport.initialize());
 // app.use(passport.session());
 
@@ -46,6 +54,21 @@ const client = new plaid.Client(
   plaid.environments.sandbox,
   {version: '2018-05-22'}
 );
+
+app.get('/users', (req, res) => {
+
+});
+
+app.post('/users', (req, res) => {
+  const { body: { full_name } } = req;
+  User.findAll({ where: { full_name } }).then(data => {
+      // if (data){
+
+      // }
+      return User.create({ full_name }); 
+    })
+    .catch(err => console.err(err));
+});
 
 app.post('/get_access_token', (req, res, next) => {
   PUBLIC_TOKEN = req.body.public_token;
@@ -97,6 +120,7 @@ app.post('/transaction_hook', (req, res) => {
 });
 
 sequelize.sync({ force: false }).then(() => {
+db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
     console.log(`Your app is manifesting on port ${process.env.PORT}!`);
   });
