@@ -13,6 +13,11 @@ const { db, models: {
   }
 } = require('./models/index');
 
+/**
+ * load test users, feel free to comment out
+ */
+const { loadData, testUsers } = require('../test_data');
+loadData(testUsers);
 
 
 /**
@@ -60,12 +65,12 @@ app.get('/users', (req, res) => {
 });
 
 app.post('/users', (req, res) => {
-  const { body: { full_name } } = req;
-  User.findAll({ where: { full_name } }).then(data => {
-      // if (data){
-
-      // }
-      return User.create({ full_name }); 
+  const { body: { name, email, picture } } = req;
+  User.findAll({ where: { email } }).then(data => {
+      return data.length 
+      // add reddirect to signup
+      ? res.send(300)
+      : User.create({ name, email, picture }); 
     })
     .catch(err => console.err(err));
 });
@@ -119,7 +124,6 @@ app.post('/transaction_hook', (req, res) => {
   // }
 });
 
-sequelize.sync({ force: false }).then(() => {
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
     console.log(`Your app is manifesting on port ${process.env.PORT}!`);
