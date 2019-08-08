@@ -66,14 +66,15 @@ app.get('/users', (req, res) => {
 });
 
 app.post('/users', (req, res) => {
-  const { body: { name, email, picture } } = req;
-  User.findAll({ where: { email } }).then(data => {
-    return data.length 
+  const { body: { name, auth0_id, picture } } = req;
+  User.findAll({ where: { auth0_id, } })
+    .then(data => {
+      return data.length 
       // add reddirect to signup
       ? res.send(300)
-      : User.create({ name, email, picture }); 
-  })
-    .catch(err => console.error(err));
+      : User.create({ name, auth0_id, picture }); 
+    })
+    .catch(err => console.err(err));
 });
 
 app.post('/get_access_token', (req, res, next) => {

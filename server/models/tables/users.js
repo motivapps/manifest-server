@@ -3,7 +3,7 @@ const db = require('../db');
 
 module.exports = db.define('users',{
   "name": Sequelize.STRING,
-  "email": {
+  "auth0_id": {
     type: Sequelize.STRING,
     unique: true
   },
