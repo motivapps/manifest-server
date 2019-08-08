@@ -17,9 +17,8 @@ const { db, models: {
 /**
  * load test users, feel free to comment out
  */
-const { loadData, testUsers } = require('../test_data');
-loadData(testUsers);
-
+const { loadDataUsers, loadDataGoals, testUsers, testGoals } = require('../test_data');
+loadDataUsers(testUsers);
 
 /**
  * express required to aid in in handeling request made to server
@@ -81,6 +80,8 @@ app.post('/users', (req, res) => {
       ? res.send(300)
       : User.create({ name, auth0_id, picture }); 
     })
+    // adds a test goal to the first loser to login!  :^ P
+    .then(() => loadDataGoals(testGoals))
     .catch(err => console.err(err));
 });
 
