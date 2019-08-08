@@ -61,8 +61,8 @@ const client = new plaid.Client(
   {version: '2018-05-22'}
 );
 
-app.get('/users', (req, res) => {
-
+app.get('/users/:Auth0_id', (req, res) => {
+  User.findAll({ where: {}})
 });
 
 app.post('/users', (req, res) => {
