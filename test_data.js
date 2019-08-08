@@ -20,7 +20,18 @@ module.exports.testUsers = [{
   picture: 'https://avatars1.githubusercontent.com/u/48036467?s=460&v=4',
 }]
 
-module.exports.loadData = (array) => {
+module.exports.testGoals = [{
+  id_user: 4,
+  vice: 'coffee',
+}]
+
+module.exports.loadDataGoals = (array) => {
+  array.forEach(async ({ id_user, vice }) => {
+    await Goal.findOrCreate({ where: { id_user, vice }})
+  });
+};
+
+module.exports.loadDataUsers = (array) => {
   array.forEach(async ({ auth0_id, name, picture }) => {
     await User.findOrCreate({ where: { auth0_id, name, picture }})
   });
