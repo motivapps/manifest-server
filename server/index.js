@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -9,8 +10,8 @@ const plaid = require('plaid');
 const { sequelize, models } = require('./models/index');
 const moment = require('moment');
 const { db, models: { 
-    Game, Goal, Relapse, Transaction, UsersGame, Vice, User
-  }
+  Game, Goal, Relapse, Transaction, UsersGame, Vice, User
+}
 } = require('./models/index');
 
 /**
@@ -67,12 +68,12 @@ app.get('/users', (req, res) => {
 app.post('/users', (req, res) => {
   const { body: { name, email, picture } } = req;
   User.findAll({ where: { email } }).then(data => {
-      return data.length 
+    return data.length 
       // add reddirect to signup
       ? res.send(300)
       : User.create({ name, email, picture }); 
-    })
-    .catch(err => console.err(err));
+  })
+    .catch(err => console.error(err));
 });
 
 app.post('/get_access_token', (req, res, next) => {
@@ -83,9 +84,15 @@ app.post('/get_access_token', (req, res, next) => {
     }
     ACCESS_TOKEN = tokenResponse.access_token;
     ITEM_ID = tokenResponse.item_id;
-    axios.get('http://localhost/auth');
+    
     console.log(JSON.stringify(tokenResponse));
     // ADD ACCESS_TOKEN AND ITEM_ID TO DATABASE HERE
+    User.update({ access_token: ACCESS_TOKEN, item_id: ITEM_ID }, {where: 
+    {
+      email: 'a.bates1993@gmail.com'
+    }
+    })
+      .catch(err => console.error(err));
     res.json({
       access_token: ACCESS_TOKEN,
       item_id: ITEM_ID,
@@ -94,6 +101,7 @@ app.post('/get_access_token', (req, res, next) => {
   });
 });
 
+// GETS BANK ACCT DATA (may or may not need this... if we do, will probably need new table in DB for users' accounts)
 app.get('/auth', (req, res) => {
   client.getAuth(ACCESS_TOKEN, (err, authResponse) => {
     if (err) {
@@ -108,8 +116,10 @@ app.post('/transaction_hook', (req, res) => {
   console.log(req);
   // check if req.body.webhook_code is DEFAULT_UPDATE
   // if it is, make a request to Plaid for transaction data
+  // commenting conditional out for now just for testing b/c default updates won't happen with sandbox
+
   // if (req.body.webhook_code === 'DEFAULT_UPDATE') {
-  const startDate = moment().subtract(1, 'days').format('YYYY-MM-DD');
+  const startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
   const endDate = moment().format('YYYY-MM-DD');
   client.getTransactions(ACCESS_TOKEN, startDate, endDate, { offset: 0 }, (err, transactionRes) => {
     if (err) {
@@ -117,8 +127,33 @@ app.post('/transaction_hook', (req, res) => {
     } else {
       console.log(transactionRes);
       // DATABASE WORK HERE
+      const itemId = transactionRes.item.item_id;
       // Parse this data, send suspicious transactions to the database
-      res.json({ transactions: transactionRes });
+      const { transactions } = transactionRes;
+      // loop over transactions to see if any transaction.category array includes "Coffee Shop"
+      // if it does, add it to suspicions
+      const suspicions = transactions.filter(transaction => transaction.category.includes('Coffee Shop'));
+      // find user associated with item_id
+      User.findOne({where: {
+        item_id: itemId
+      }})
+        .then((user) => {
+          suspicions.forEach(suspicion => {
+            Transaction.findOrCreate({where: {
+              transaction_id: suspicion.transaction_id
+            },
+            defaults: {
+              id_user: user.id,
+              status: 'pending',
+              name: suspicion.name,
+              day: suspicion.date,
+              amount: suspicion.amount,
+            }
+            });
+          });
+        })
+        .catch(err => console.error(err));
+      // res.json({ transactions: transactionRes });
     }
   });
   // }
