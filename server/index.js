@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -9,8 +10,8 @@ const plaid = require('plaid');
 const { sequelize, models } = require('./models/index');
 const moment = require('moment');
 const { db, models: { 
-    Game, Goal, Relapse, Transaction, UsersGame, Vice, User
-  }
+  Game, Goal, Relapse, Transaction, UsersGame, Vice, User
+}
 } = require('./models/index');
 
 /**
@@ -67,12 +68,12 @@ app.get('/users', (req, res) => {
 app.post('/users', (req, res) => {
   const { body: { name, email, picture } } = req;
   User.findAll({ where: { email } }).then(data => {
-      return data.length 
+    return data.length 
       // add reddirect to signup
       ? res.send(300)
       : User.create({ name, email, picture }); 
-    })
-    .catch(err => console.err(err));
+  })
+    .catch(err => console.error(err));
 });
 
 app.post('/get_access_token', (req, res, next) => {
@@ -86,6 +87,12 @@ app.post('/get_access_token', (req, res, next) => {
     axios.get('http://localhost/auth');
     console.log(JSON.stringify(tokenResponse));
     // ADD ACCESS_TOKEN AND ITEM_ID TO DATABASE HERE
+    User.update({ access_token: ACCESS_TOKEN, item_id: ITEM_ID }, {where: 
+    {
+      email: 'a.bates1993@gmail.com'
+    }
+    })
+      .catch(err => console.error(err));
     res.json({
       access_token: ACCESS_TOKEN,
       item_id: ITEM_ID,
@@ -124,7 +131,7 @@ app.post('/transaction_hook', (req, res) => {
   // }
 });
 
-db.sync({ force: false }).then(() => {
+db.sync({ force: true }).then(() => {
   app.listen(process.env.PORT, () => {
     console.log(`Your app is manifesting on port ${process.env.PORT}!`);
   });
