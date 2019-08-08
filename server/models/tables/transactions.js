@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const db = require('../db');
 
-module.exports = db.define('relapses', {
+module.exports = db.define('transactions', {
     "id_user": {
       type: Sequelize.INTEGER,
       model: "users",
@@ -9,7 +9,7 @@ module.exports = db.define('relapses', {
     },
     "status": {
       type: Sequelize.ENUM,
-      values: ['pending', 'dismissed', 'else'],
+      values: ["pending", "dismissed", "else"],
     },
     "name": Sequelize.STRING,
     "day": Sequelize.DATE,

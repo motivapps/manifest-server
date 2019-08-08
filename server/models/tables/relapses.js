@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const db = require('../db');
 
-module.exports = sequelize.define('relapses', {
+module.exports = db.define('relapses', {
     "id_user": {
       type: Sequelize.INTEGER,
       model: "users",

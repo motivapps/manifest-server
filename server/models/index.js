@@ -1,10 +1,10 @@
 const User = require('./tables/users');
-const Game = require('./tables/users');
-const Goal = require('./tables/users');
-const Relapse = require('./tables/users');
-const Transaction = require('./tables/users');
-const UserGame = require('./tables/users');
-const Vice = require('./tables/users');
+const Game = require('./tables/games');
+const Goal = require('./tables/goals');
+const Relapse = require('./tables/relapses');
+const Transaction = require('./tables/transactions');
+const UserGame = require('./tables/users_games');
+const Vice = require('./tables/vices');
 
 const db = require('./db');
 
