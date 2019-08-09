@@ -71,18 +71,30 @@ app.get('/users/:auth0_id', (req, res) => {
     .catch(err => res.status(500))
 });
 
-app.post('/users', (req, res) => {
+app.post('/signup', (req, res) => {
   const { body: { name, auth0_id, picture } } = req;
   User.findAll({ where: { auth0_id, } })
     .then(data => {
       return data.length 
       // add reddirect to signup
-      ? res.send(300)
+      ? res.status(300).end()
       : User.create({ name, auth0_id, picture }); 
     })
     // adds a test goal to the first loser to login!  :^ P
     .then(() => loadDataGoals(testGoals))
-    .catch(err => console.err(err));
+    .catch(err => console.error(err));
+});
+
+app.post('/login', (req, res) => {
+  const { body: { auth0_id } } = req;
+  User.findAll({ where: { auth0_id, } })
+    .then(data => {
+      return data.length
+        // add reddirect to signup
+        ? res.status(300).end()
+        : res.status(201).send(data);
+    })
+    .catch(err => console.error(err));
 });
 
 app.post('/get_access_token', (req, res, next) => {
