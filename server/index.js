@@ -61,14 +61,14 @@ const client = new plaid.Client(
 );
 
 app.get('/users/:auth0_id', (req, res) => {
-  const { auth0_id } = req.params
+  const { auth0_id } = req.params;
   User.findAll({ where: { auth0_id }})
     .then(data => {
       return data.length 
-        ? res.staus(204).send("Not Found") 
+        ? res.staus(204).send('Not Found') 
         : res.status(200).send(data);
     })
-    .catch(err => res.status(500))
+    .catch(err => res.status(500));
 });
 
 app.post('/signup', (req, res) => {
@@ -77,8 +77,8 @@ app.post('/signup', (req, res) => {
     .then(data => {
       return data.length 
       // add reddirect to signup
-      ? res.status(300).end()
-      : User.create({ name, auth0_id, picture }); 
+        ? res.status(300).end()
+        : User.create({ name, auth0_id, picture }); 
     })
     // adds a test goal to the first loser to login!  :^ P
     .then(() => loadDataGoals(testGoals))
@@ -99,6 +99,7 @@ app.post('/login', (req, res) => {
 
 app.post('/get_access_token', (req, res, next) => {
   PUBLIC_TOKEN = req.body.public_token;
+  const { userToken } = req.body;
   client.exchangePublicToken(PUBLIC_TOKEN, (err, tokenResponse) => {
     if (err) {
       console.error('Problem exchanging public token ' + err);
@@ -110,7 +111,7 @@ app.post('/get_access_token', (req, res, next) => {
     // ADD ACCESS_TOKEN AND ITEM_ID TO DATABASE HERE
     User.update({ access_token: ACCESS_TOKEN, item_id: ITEM_ID }, {where: 
     {
-      email: 'a.bates1993@gmail.com'
+      auth0_id: userToken
     }
     })
       .catch(err => console.error(err));
@@ -180,20 +181,35 @@ app.post('/transaction_hook', (req, res) => {
   // }
 });
 
+app.get('/transactions/:auth0_id', (req, res) => {
+  // when client hits this endpoint, we want to send back suspicious transactions
+  // find user by auth0 id
+  User.findOne({where: {auth0_id: req.params.auth0_id}})
+    .then((user) => {
+      // use users id to find corresponding transactions
+      return Transaction.findAll({where: {id_user: user.id}});
+    })
+    .then((transactions) => {
+      res.status(200);
+      res.json(transactions);
+    })
+    .catch(err => console.error(err));
+});
+
 app.post('/pushtoken', (req, res) => {
   console.log('inside pushtoken route');
   console.log('push token req:', req.body);
   User.update(
     {device_token: req.body.pushToken},
     {where: {auth0_id: req.body.authID}
-  })
-  .then((response) => {
-    res.status(201).send(response);
-  })
-  .catch((err) => {
-    console.error(err);
-  })
-})
+    })
+    .then((response) => {
+      res.status(201).send(response);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
 
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
