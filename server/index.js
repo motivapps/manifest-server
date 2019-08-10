@@ -180,6 +180,21 @@ app.post('/transaction_hook', (req, res) => {
   // }
 });
 
+app.post('/pushtoken', (req, res) => {
+  console.log('inside pushtoken route');
+  console.log('push token req:', req.body);
+  User.update(
+    {device_token: req.body.pushToken},
+    {where: {auth0_id: req.body.authID}
+  })
+  .then((response) => {
+    res.status(201).send(response);
+  })
+  .catch((err) => {
+    console.error(err);
+  })
+})
+
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
     console.log(`Your app is manifesting on port ${process.env.PORT}!`);

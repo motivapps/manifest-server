@@ -11,6 +11,7 @@ module.exports = db.define('users',{
   "access_token": Sequelize.STRING,
   "item_id": Sequelize.STRING,
   "session_token": Sequelize.STRING,
+  "device_token": Sequelize.STRING,
   "totalSaved": Sequelize.INTEGER,
   "transfer_schedule": {
     type: Sequelize.ENUM,
