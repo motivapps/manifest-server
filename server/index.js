@@ -196,6 +196,22 @@ app.get('/transactions/:auth0_id', (req, res) => {
     .catch(err => console.error(err));
 });
 
+app.get('/goals/:auth0_id', (req, res) => {
+  // when client hits this endpoint, we want to send back suspicious transactions
+  // find user by auth0 id
+  User.findOne({where: {auth0_id: req.params.auth0_id}})
+    .then((user) => {
+      // use users id to find corresponding transactions
+      return Goal.findAll({where: {id_user: user.id}});
+    })
+    .then((goals) => {
+      res.status(200);
+      res.json(goals);
+    })
+    .catch(err => console.error(err));
+});
+
+
 app.post('/pushtoken', (req, res) => {
   console.log('inside pushtoken route');
   console.log('push token req:', req.body);
