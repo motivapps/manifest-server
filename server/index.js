@@ -190,6 +190,7 @@ app.get('/transactions/:auth0_id', (req, res) => {
       return Transaction.findAll({where: {id_user: user.id}});
     })
     .then((transactions) => {
+      console.log('transactions:', transactions);
       res.status(200);
       res.json(transactions);
     })
@@ -226,6 +227,11 @@ app.post('/pushtoken', (req, res) => {
       console.error(err);
     });
 });
+
+app.post('/user/goals', (req, res) => {
+  console.log('inside pushtoken route');
+  console.log('goals post req:', req.body);
+})
 
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
