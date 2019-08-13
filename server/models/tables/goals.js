@@ -14,11 +14,12 @@ module.exports = db.define('goals', {
     },
     "streak_days": Sequelize.INTEGER,
     "goal_name": Sequelize.STRING,
-    "goal_cost": Sequelize.INTEGER,
+    "goal_item": Sequelize.STRING,
+    "goal_cost": Sequelize.FLOAT,
     "amount_saved": Sequelize.INTEGER,
     "relapse_count": Sequelize.INTEGER,
     "relapse_costTotal": Sequelize.INTEGER,
     "vice_freq": Sequelize.STRING,
-    "vice_price": Sequelize.INTEGER,
+    "vice_price": Sequelize.FLOAT,
   }, { db }
 );
