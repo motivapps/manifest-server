@@ -229,9 +229,6 @@ app.post('/pushtoken', (req, res) => {
 });
 
 app.post('/user/goals', (req, res) => {
-  console.log('inside pushtoken route');
-  console.log('goals post req:', req.body);
-  
   Goal.create({ 
     id_user: req.body.userId,
     vice: req.body.viceName,
@@ -244,7 +241,6 @@ app.post('/user/goals', (req, res) => {
 });
 
 app.get('/user/:auth0_id', (req, res) => {
-  console.log('inside user id get');
   User.findOne({ where: { auth0_id: req.params.auth0_id } })
   .then((response) => {
     console.log('then response:', response);
