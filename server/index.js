@@ -81,7 +81,7 @@ app.post('/signup', (req, res) => {
         : User.create({ name, auth0_id, picture }); 
     })
     // adds a test goal to the first loser to login!  :^ P
-    .then(() => loadDataGoals(testGoals))
+  //  .then(() => loadDataGoals(testGoals))
     .catch(err => console.error(err));
 });
 
@@ -190,6 +190,7 @@ app.get('/transactions/:auth0_id', (req, res) => {
       return Transaction.findAll({where: {id_user: user.id}});
     })
     .then((transactions) => {
+      console.log('transactions:', transactions);
       res.status(200);
       res.json(transactions);
     })
@@ -226,6 +227,29 @@ app.post('/pushtoken', (req, res) => {
       console.error(err);
     });
 });
+
+app.post('/user/goals', (req, res) => {
+  Goal.create({ 
+    id_user: req.body.userId,
+    vice: req.body.viceName,
+    goal_name: req.body.goalName,
+    goal_item: req.body.goalItem,
+    goal_cost: req.body.goalAmount,
+    vice_freq: req.body.viceFrequency,
+    vice_price: req.body.vicePrice,
+  })
+});
+
+app.get('/user/:auth0_id', (req, res) => {
+  User.findOne({ where: { auth0_id: req.params.auth0_id } })
+  .then((response) => {
+    console.log('then response:', response);
+    res.status(200).send(response);
+  })
+  .catch((err) => {
+    console.log('UserId get error:', err);
+  })
+})
 
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
