@@ -196,6 +196,34 @@ app.get('/transactions/:auth0_id', (req, res) => {
     .catch(err => console.error(err));
 });
 
+// Suspicious transaction has been denied:
+app.patch('/deny_transaction', (req, res) => {
+  const { transaction_id } = req.body;
+  // update said transaction's status to 'dismissed'
+  Transaction.update(
+    {status: 'dismissed'}, 
+    { where: {transaction_id}})
+    .then(response => {
+      res.status(200);
+      res.json(response);
+    })
+    .catch(err => console.error(err));
+});
+
+// Suspicious transaction has been accepted:
+app.patch('/accept_transaction', (req, res) => {
+  const { transaction_id } = req.body;
+  // update said transaction's status to 'dismissed'
+  Transaction.update(
+    {status: 'relapsed'}, 
+    { where: {transaction_id}})
+    .then(response => {
+      res.status(200);
+      res.json(response);
+    })
+    .catch(err => console.error(err));
+});
+
 app.get('/goals/:auth0_id', (req, res) => {
   // when client hits this endpoint, we want to send back suspicious transactions
   // find user by auth0 id
