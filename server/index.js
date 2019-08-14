@@ -13,6 +13,7 @@ const { db, models: {
   Game, Goal, Relapse, Transaction, UsersGame, Vice, User
 }
 } = require('./models/index');
+const { createCustomer } = require('./dbHelpers');
 
 /**
  * load test users, feel free to comment out
@@ -32,14 +33,14 @@ loadDataUsers(testUsers);
 const app = express();
 
 /**
- * middleware assigned to app for use with incoming requests
+ * middleware assigned to app for use with incoming requests 
  */
 
 app.use(express.static(path.join(__dirname, '../dist')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(session({ secret: 'anything' }));
 
+// app.use(session({ secret: 'anything' }));
 // // Initialize Passport
 // app.use(passport.initialize());
 // app.use(passport.session());
@@ -124,14 +125,23 @@ app.post('/get_access_token', (req, res, next) => {
 });
 
 // GETS BANK ACCT DATA (may or may not need this... if we do, will probably need new table in DB for users' accounts)
-app.get('/auth', (req, res) => {
-  client.getAuth(ACCESS_TOKEN, (err, authResponse) => {
-    if (err) {
-      console.error(err);
-    }
-    console.log(authResponse);
-    res.json({ error: null, auth: authResponse });
-  });
+// need to send userToken with user...
+app.post('/auth', (req, res) => {
+  const { userToken } = req.body;
+  User.findAll({ where: {
+    auth0_id: userToken
+  }}).then(async (data) => {
+    const user  = data[0];
+    client.getAuth(user.access_token, (err, authResponse) => {
+      if (err) {
+        console.error(err);
+      }
+      console.log(user);
+  
+      createCustomer(authResponse, user);
+      res.status(300).json({ error: null, auth: authResponse });
+    });
+  }).catch((err) => console.log(err));
 });
 
 app.post('/transaction_hook', (req, res) => {
