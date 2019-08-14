@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const plaid = require('plaid');
 const { sequelize, models } = require('./models/index');
+const Sequelize = require('sequelize');
 const moment = require('moment');
 const { db, models: { 
   Game, Goal, Relapse, Transaction, UsersGame, Vice, User
@@ -241,21 +242,22 @@ app.patch('/accept_transaction/:auth0_id', (req, res) => {
       return user.id;
     })
     .then(userId => {
-      let goalId = '';
       // UPDATE GOALS
       Goal.update(
-        { relapse_count: relapse_count += 1,
-          relapse_cost_total: relapse_cost_total += amount, },
+        { relapse_count: Sequelize.literal('relapse_count + 1'),
+          relapse_cost_total: Sequelize.literal(`relapse_cost_total + ${Number(amount)}`),
+          streak_days: 0,
+        },
         { where: { id_user: userId }}
       )
+      // CREATE RELAPSE
+      Goal.findOne({where: {id_user: userId}})
       .then(goal => {
-        goalId = goal.id;
-        // CREATE RELAPSE
         Relapse.create({
           id_user: userId,
-          id_goal: goalId,
+          id_goal: goal.id,
           day,
-          cost: amount
+          cost: Number(amount)
         })
       })
     });
