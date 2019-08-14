@@ -10,11 +10,24 @@ module.exports.createCustomer = ( { accounts }, { name, id } ) => {
     // source: "tok_mastercard" // obtained with Stripe.js
   }, function (err, customer) {
     // asynchronously called
+    
     User.update({
-      stripe_customer: JSON.stringify(customer),
-      accounts: JSON.stringify(accounts),
+      stripe_customer: customer.id,
+      accounts: mapAccounts(accounts),
     }, {
       where: { id },
     });
   });
+};
+
+const mapAccounts = (array) => {
+  return array.reduce((array, { account_id, name, official_name, subtype }) => {
+    obj = {
+      account_id,
+      official_name,
+      subtype,
+      name,
+    };
+    return array.concat([JSON.stringify(obj)])
+  }, []);
 };
