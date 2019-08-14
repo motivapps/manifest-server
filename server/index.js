@@ -228,7 +228,7 @@ app.patch('/accept_transaction', (req, res) => {
   //   { relapse_count: relapse_count += 1,
   //     relapse_costTotal: relapse_costTotal += amount, },
   //     { where: {}}
-  )  
+  // )  
 });
 
 app.get('/goals/:auth0_id', (req, res) => {
