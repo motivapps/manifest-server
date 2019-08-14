@@ -19,7 +19,7 @@ module.exports = db.define('users',{
   },
   "games": Sequelize.INTEGER,
   "stripe_id": Sequelize.STRING,
-  "accounts": Sequelize.ARRAY(TEXT),
+  "accounts": Sequelize.ARRAY(Sequelize.TEXT),
   }, { db }
 );
 // add stripe customer object
