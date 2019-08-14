@@ -141,7 +141,7 @@ app.post('/transaction_hook', (req, res) => {
   // commenting conditional out for now just for testing b/c default updates won't happen with sandbox
 
   // if (req.body.webhook_code === 'DEFAULT_UPDATE') {
-  const startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
+  const startDate = moment().subtract(300, 'days').format('YYYY-MM-DD');
   const endDate = moment().format('YYYY-MM-DD');
   client.getTransactions(ACCESS_TOKEN, startDate, endDate, { offset: 0 }, (err, transactionRes) => {
     if (err) {
@@ -213,7 +213,7 @@ app.patch('/deny_transaction', (req, res) => {
 
 // Suspicious transaction has been accepted:
 app.patch('/accept_transaction', (req, res) => {
-  const { transaction_id } = req.body;
+  const { transaction_id, amount } = req.body;
   // update said transaction's status to 'dismissed'
   Transaction.update(
     {status: 'relapsed'}, 
@@ -223,6 +223,12 @@ app.patch('/accept_transaction', (req, res) => {
       res.json(response);
     })
     .catch(err => console.error(err));
+    // ALSO NEED TO UPDATE GOALS AND RELAPSE TABLES!
+  // Goal.update(
+  //   { relapse_count: relapse_count += 1,
+  //     relapse_costTotal: relapse_costTotal += amount, },
+  //     { where: {}}
+  )  
 });
 
 app.get('/goals/:auth0_id', (req, res) => {
