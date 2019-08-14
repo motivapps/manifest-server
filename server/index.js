@@ -198,8 +198,9 @@ app.get('/transactions/:auth0_id', (req, res) => {
 });
 
 // Suspicious transaction has been denied:
-app.patch('/deny_transaction', (req, res) => {
+app.patch('/deny_transaction/:auth0_id', (req, res) => {
   const { transaction_id } = req.body;
+  const { auth0_id } = req.params;
   // update said transaction's status to 'dismissed'
   Transaction.update(
     {status: 'dismissed'}, 
@@ -212,8 +213,9 @@ app.patch('/deny_transaction', (req, res) => {
 });
 
 // Suspicious transaction has been accepted:
-app.patch('/accept_transaction', (req, res) => {
+app.patch('/accept_transaction/:auth0_id', (req, res) => {
   const { transaction_id, amount } = req.body;
+  const { auth0_id } = req.params;
   // update said transaction's status to 'dismissed'
   Transaction.update(
     {status: 'relapsed'}, 
@@ -223,12 +225,18 @@ app.patch('/accept_transaction', (req, res) => {
       res.json(response);
     })
     .catch(err => console.error(err));
-    // ALSO NEED TO UPDATE GOALS AND RELAPSE TABLES!
-  // Goal.update(
-  //   { relapse_count: relapse_count += 1,
-  //     relapse_costTotal: relapse_costTotal += amount, },
-  //     { where: {}}
-  // )  
+  // ALSO NEED TO UPDATE GOALS AND RELAPSE TABLES!
+  User.findOne({where: { auth0_id }})
+    .then(user => {
+      return user.id;
+    })
+    .then(userId => {
+      Goal.update(
+        { relapse_count: relapse_count += 1,
+          relapse_costTotal: relapse_costTotal += amount, },
+        { where: { id_user: userId }}
+      );  
+    });
 });
 
 app.get('/goals/:auth0_id', (req, res) => {
@@ -271,19 +279,23 @@ app.post('/user/goals', (req, res) => {
     goal_cost: req.body.goalAmount,
     vice_freq: req.body.viceFrequency,
     vice_price: req.body.vicePrice,
-  })
+    amount_saved: 0,
+    relapse_count: 0,
+    relapse_costTotal: 0,
+    streak_days: 0,
+  });
 });
 
 app.get('/user/:auth0_id', (req, res) => {
   User.findOne({ where: { auth0_id: req.params.auth0_id } })
-  .then((response) => {
-    console.log('then response:', response);
-    res.status(200).send(response);
-  })
-  .catch((err) => {
-    console.log('UserId get error:', err);
-  })
-})
+    .then((response) => {
+      console.log('then response:', response);
+      res.status(200).send(response);
+    })
+    .catch((err) => {
+      console.log('UserId get error:', err);
+    });
+});
 
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
