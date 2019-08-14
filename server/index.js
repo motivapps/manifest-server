@@ -233,7 +233,7 @@ app.patch('/accept_transaction/:auth0_id', (req, res) => {
     .then(userId => {
       Goal.update(
         { relapse_count: relapse_count += 1,
-          relapse_costTotal: relapse_costTotal += amount, },
+          relapse_cost_total: relapse_cost_total += amount, },
         { where: { id_user: userId }}
       );  
     });
@@ -281,7 +281,7 @@ app.post('/user/goals', (req, res) => {
     vice_price: req.body.vicePrice,
     amount_saved: 0,
     relapse_count: 0,
-    relapse_costTotal: 0,
+    relapse_cost_total: 0,
     streak_days: 0,
   });
 });
