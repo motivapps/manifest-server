@@ -33,14 +33,14 @@ loadDataUsers(testUsers);
 const app = express();
 
 /**
- * middleware assigned to app for use with incoming requests
+ * middleware assigned to app for use with incoming requests 
  */
 
 app.use(express.static(path.join(__dirname, '../dist')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(session({ secret: 'anything' }));
 
+// app.use(session({ secret: 'anything' }));
 // // Initialize Passport
 // app.use(passport.initialize());
 // app.use(passport.session());

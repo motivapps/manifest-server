@@ -1,15 +1,20 @@
+const { models: { User} } = require('./models/index');
 const axios = require('axios');
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
-
-
-module.exports.createCustomer = ( bankInfo, user ) => {
+module.exports.createCustomer = ( { accounts }, { name, id } ) => {
   stripe.customers.create({
     // set description to user acct type
     // find out where i get savings acct num
-    description: 'Customer for jenny.rosen@example.com',
-    source: "tok_mastercard" // obtained with Stripe.js
+    description: name,
+    // source: "tok_mastercard" // obtained with Stripe.js
   }, function (err, customer) {
     // asynchronously called
+    User.update({
+      stripe_customer: JSON.stringify(customer),
+      accounts: JSON.stringify(accounts),
+    }, {
+      where: { id },
+    });
   });
 };
