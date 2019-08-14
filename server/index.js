@@ -224,7 +224,7 @@ app.patch('/deny_transaction/:auth0_id', (req, res) => {
 
 // Suspicious transaction has been accepted:
 app.patch('/accept_transaction/:auth0_id', (req, res) => {
-  const { transaction_id, amount } = req.body;
+  const { transaction_id, amount, day } = req.body;
   const { auth0_id } = req.params;
   // update said transaction's status to 'dismissed'
   Transaction.update(
@@ -241,11 +241,23 @@ app.patch('/accept_transaction/:auth0_id', (req, res) => {
       return user.id;
     })
     .then(userId => {
+      let goalId = '';
+      // UPDATE GOALS
       Goal.update(
         { relapse_count: relapse_count += 1,
           relapse_cost_total: relapse_cost_total += amount, },
         { where: { id_user: userId }}
-      );  
+      )
+      .then(goal => {
+        goalId = goal.id;
+        // CREATE RELAPSE
+        Relapse.create({
+          id_user: userId,
+          id_goal: goalId,
+          day,
+          cost: amount
+        })
+      })
     });
 });
 
