@@ -242,9 +242,13 @@ app.post('/user/goals', (req, res) => {
   Goal.create({ 
     id_user: req.body.userId,
     vice: req.body.viceName,
+    streak_days: 0,
     goal_name: req.body.goalName,
     goal_item: req.body.goalItem,
     goal_cost: req.body.goalAmount,
+    amount_saved: 0.00,
+    relapse_count: 0,
+    relapse_costTotal: 0.00,
     vice_freq: req.body.viceFrequency,
     vice_price: req.body.vicePrice,
   })
