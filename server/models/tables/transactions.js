@@ -9,7 +9,7 @@ module.exports = db.define('transactions', {
   },
   'status': {
     type: Sequelize.ENUM,
-    values: ['pending', 'dismissed', 'else'],
+    values: ['pending', 'dismissed', 'relapsed'],
   },
   'name': Sequelize.STRING,
   'day': Sequelize.DATE,
