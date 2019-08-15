@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const plaid = require('plaid');
 const { sequelize, models } = require('./models/index');
+const Sequelize = require('sequelize');
 const moment = require('moment');
 const { db, models: { 
   Game, Goal, Relapse, Transaction, UsersGame, Vice, User
@@ -151,7 +152,7 @@ app.post('/transaction_hook', (req, res) => {
   // commenting conditional out for now just for testing b/c default updates won't happen with sandbox
 
   // if (req.body.webhook_code === 'DEFAULT_UPDATE') {
-  const startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
+  const startDate = moment().subtract(300, 'days').format('YYYY-MM-DD');
   const endDate = moment().format('YYYY-MM-DD');
   client.getTransactions(ACCESS_TOKEN, startDate, endDate, { offset: 0 }, (err, transactionRes) => {
     if (err) {
@@ -207,6 +208,61 @@ app.get('/transactions/:auth0_id', (req, res) => {
     .catch(err => console.error(err));
 });
 
+// Suspicious transaction has been denied:
+app.patch('/deny_transaction/:auth0_id', (req, res) => {
+  const { transaction_id } = req.body;
+  const { auth0_id } = req.params;
+  // update said transaction's status to 'dismissed'
+  Transaction.update(
+    {status: 'dismissed'}, 
+    { where: {transaction_id}})
+    .then(response => {
+      res.status(200);
+      res.json(response);
+    })
+    .catch(err => console.error(err));
+});
+
+// Suspicious transaction has been accepted:
+app.patch('/accept_transaction/:auth0_id', (req, res) => {
+  const { transaction_id, amount, day } = req.body;
+  const { auth0_id } = req.params;
+  // update said transaction's status to 'dismissed'
+  Transaction.update(
+    {status: 'relapsed'}, 
+    { where: {transaction_id}})
+    .then(response => {
+      res.status(200);
+      res.json(response);
+    })
+    .catch(err => console.error(err));
+  // ALSO NEED TO UPDATE GOALS AND RELAPSE TABLES!
+  User.findOne({where: { auth0_id }})
+    .then(user => {
+      return user.id;
+    })
+    .then(userId => {
+      // UPDATE GOALS
+      Goal.update(
+        { relapse_count: Sequelize.literal('relapse_count + 1'),
+          relapse_cost_total: Sequelize.literal(`relapse_cost_total + ${Number(amount)}`),
+          streak_days: 0,
+        },
+        { where: { id_user: userId }}
+      )
+      // CREATE RELAPSE
+      Goal.findOne({where: {id_user: userId}})
+      .then(goal => {
+        Relapse.create({
+          id_user: userId,
+          id_goal: goal.id,
+          day,
+          cost: Number(amount)
+        })
+      })
+    });
+});
+
 app.get('/goals/:auth0_id', (req, res) => {
   // when client hits this endpoint, we want to send back suspicious transactions
   // find user by auth0 id
@@ -256,23 +312,23 @@ app.post('/user/goals', (req, res) => {
     goal_cost: req.body.goalAmount,
     amount_saved: 0.00,
     relapse_count: 0,
-    relapse_costTotal: 0.00,
+    relapse_cost_total: 0,
     vice_freq: req.body.viceFrequency,
     vice_price: req.body.vicePrice,
     daily_savings: dailySavings.toFixed(2),
-  })
+  });
 });
 
 app.get('/user/:auth0_id', (req, res) => {
   User.findOne({ where: { auth0_id: req.params.auth0_id } })
-  .then((response) => {
-    console.log('then response:', response);
-    res.status(200).send(response);
-  })
-  .catch((err) => {
-    console.log('UserId get error:', err);
-  })
-})
+    .then((response) => {
+      console.log('then response:', response);
+      res.status(200).send(response);
+    })
+    .catch((err) => {
+      console.log('UserId get error:', err);
+    });
+});
 
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {

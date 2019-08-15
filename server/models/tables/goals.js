@@ -23,4 +23,5 @@ module.exports = db.define('goals', {
     "vice_price": Sequelize.FLOAT,
     "daily_savings": Sequelize.FLOAT,
   }, { db }
+
 );
