@@ -66,9 +66,9 @@ app.get('/users/:auth0_id', (req, res) => {
   const { auth0_id } = req.params;
   User.findAll({ where: { auth0_id }})
     .then(data => {
-      return data.length 
-        ? res.staus(204).send('Not Found') 
-        : res.status(200).send(data);
+      return !data.length 
+      ? res.staus(204).send('Not Found') 
+      : res.status(200).send(data);
     })
     .catch(err => res.status(500));
 });
@@ -77,10 +77,13 @@ app.post('/signup', (req, res) => {
   const { body: { name, auth0_id, picture } } = req;
   User.findAll({ where: { auth0_id, } })
     .then(data => {
-      return data.length 
+      return !data.length 
       // add reddirect to signup
         ? res.status(300).end()
-        : User.create({ name, auth0_id, picture }); 
+        : (
+          User.create({ name, auth0_id, picture }),
+          res.status(201).end()
+        );
     })
     // adds a test goal to the first loser to login!  :^ P
   //  .then(() => loadDataGoals(testGoals))
@@ -91,10 +94,10 @@ app.post('/login', (req, res) => {
   const { body: { auth0_id } } = req;
   User.findAll({ where: { auth0_id, } })
     .then(data => {
-      return data.length
+      return !data.length
         // add reddirect to signup
-        ? res.status(300).end()
-        : res.status(201).send(data);
+        ? res.status(449).end()
+        : res.status(200).send(data);
     })
     .catch(err => console.error(err));
 });
@@ -111,12 +114,15 @@ app.post('/get_access_token', (req, res, next) => {
     
     console.log(JSON.stringify(tokenResponse));
     // ADD ACCESS_TOKEN AND ITEM_ID TO DATABASE HERE
-    User.update({ access_token: ACCESS_TOKEN, item_id: ITEM_ID }, {where: 
-    {
-      auth0_id: userToken
-    }
-    })
-      .catch(err => console.error(err));
+    User.update({ 
+      access_token: ACCESS_TOKEN, 
+      item_id: ITEM_ID 
+    }, {
+      where: {
+        auth0_id: userToken
+      }
+    }).catch(err => console.error(err));
+
     res.json({
       access_token: ACCESS_TOKEN,
       item_id: ITEM_ID,
@@ -140,7 +146,7 @@ app.post('/auth', (req, res) => {
       console.log(user);
   
       createCustomer(authResponse, user);
-      res.status(300).json({ error: null, auth: authResponse });
+      res.json({ error: null, auth: authResponse });
     });
   }).catch((err) => console.log(err));
 });
