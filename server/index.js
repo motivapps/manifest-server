@@ -77,7 +77,7 @@ app.post('/signup', (req, res) => {
   const { body: { name, auth0_id, picture } } = req;
   User.findAll({ where: { auth0_id, } })
     .then(data => {
-      return !data.length 
+      return data.length 
       // add reddirect to signup
         ? res.status(300).end()
         : (
