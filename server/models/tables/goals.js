@@ -16,9 +16,9 @@ module.exports = db.define('goals', {
     "goal_name": Sequelize.STRING,
     "goal_item": Sequelize.STRING,
     "goal_cost": Sequelize.FLOAT,
-    "amount_saved": Sequelize.INTEGER,
+    "amount_saved": Sequelize.FLOAT,
     "relapse_count": Sequelize.INTEGER,
-    "relapse_costTotal": Sequelize.INTEGER,
+    "relapse_cost_total": Sequelize.FLOAT,
     "vice_freq": Sequelize.STRING,
     "vice_price": Sequelize.FLOAT,
   }, { db }
