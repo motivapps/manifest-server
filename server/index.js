@@ -259,7 +259,7 @@ app.post('/user/goals', (req, res) => {
     relapse_costTotal: 0.00,
     vice_freq: req.body.viceFrequency,
     vice_price: req.body.vicePrice,
-    daily_savings: dailySavings,
+    daily_savings: dailySavings.toFixed(2),
   })
 });
 
