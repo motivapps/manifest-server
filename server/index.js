@@ -77,13 +77,13 @@ app.post('/signup', (req, res) => {
   const { body: { name, auth0_id, picture } } = req;
   User.findAll({ where: { auth0_id, } })
     .then(data => {
-      return data.length 
-      // add reddirect to signup
-        ? res.status(300).end()
-        : (
-          User.create({ name, auth0_id, picture }),
-          res.status(201).end()
-        );
+      if( data.length ){ 
+        res.status(300).end();
+      } else {
+        // add reddirect to signup
+        User.create({ name, auth0_id, picture });
+        res.status(201).end();
+      }
     })
     // adds a test goal to the first loser to login!  :^ P
   //  .then(() => loadDataGoals(testGoals))
