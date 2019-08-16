@@ -302,12 +302,13 @@ app.post('/pushtoken', (req, res) => {
 
 app.post('/user/goals', (req, res) => {
   let dailySavings;
+  let vicePrice = Number(req.body.vicePrice)
   if (req.body.viceFrequency === 'Daily') {
-    dailySavings = (req.body.vicePrice).toFixed(2);
+    dailySavings = (vicePrice).toFixed(2);
   } else if (req.body.viceFrequency === 'Twice Per Week') {
-    dailySavings = ((req.body.vicePrice * 2) / 7).toFixed(2);
+    dailySavings = ((vicePrice * 2) / 7).toFixed(2);
   } else if (req.body.viceFrequency === 'Once Per Week') {
-    dailySavings = r(eq.body.vicePrice / 7).toFixed(2);
+    dailySavings = (vicePrice / 7).toFixed(2);
   }
   Goal.create({ 
     id_user: req.body.userId,
