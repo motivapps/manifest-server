@@ -303,11 +303,11 @@ app.post('/pushtoken', (req, res) => {
 app.post('/user/goals', (req, res) => {
   let dailySavings;
   if (req.body.viceFrequency === 'Daily') {
-    dailySavings = parsedGoal.vice_price;
+    dailySavings = (req.body.vicePrice).toFixed(2);
   } else if (req.body.viceFrequency === 'Twice Per Week') {
-    dailySavings = (req.body.vicePrice * 2) / 7;
+    dailySavings = ((req.body.vicePrice * 2) / 7).toFixed(2);
   } else if (req.body.viceFrequency === 'Once Per Week') {
-    dailySavings = req.body.vicePrice / 7;
+    dailySavings = r(eq.body.vicePrice / 7).toFixed(2);
   }
   Goal.create({ 
     id_user: req.body.userId,
@@ -321,7 +321,7 @@ app.post('/user/goals', (req, res) => {
     relapse_cost_total: 0,
     vice_freq: req.body.viceFrequency,
     vice_price: req.body.vicePrice,
-    daily_savings: dailySavings.toFixed(2),
+    daily_savings: dailySavings,
   });
 });
 
