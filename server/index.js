@@ -15,6 +15,7 @@ const { db, models: {
 }
 } = require('./models/index');
 const { createCustomer } = require('./dbHelpers');
+const { CronJob } = require('cron');
 
 /**
  * load test users, feel free to comment out
@@ -302,12 +303,13 @@ app.post('/pushtoken', (req, res) => {
 
 app.post('/user/goals', (req, res) => {
   let dailySavings;
+  let vicePrice = Number(req.body.vicePrice)
   if (req.body.viceFrequency === 'Daily') {
-    dailySavings = (req.body.vicePrice).toFixed(2);
+    dailySavings = (vicePrice).toFixed(2);
   } else if (req.body.viceFrequency === 'Twice Per Week') {
-    dailySavings = ((req.body.vicePrice * 2) / 7).toFixed(2);
+    dailySavings = ((vicePrice * 2) / 7).toFixed(2);
   } else if (req.body.viceFrequency === 'Once Per Week') {
-    dailySavings = r(eq.body.vicePrice / 7).toFixed(2);
+    dailySavings = (vicePrice / 7).toFixed(2);
   }
   Goal.create({ 
     id_user: req.body.userId,
@@ -336,6 +338,14 @@ app.get('/user/:auth0_id', (req, res) => {
       console.log('UserId get error:', err);
     });
 });
+
+// CRON JOB/UPDATE AMOUNT SAVED EACH DAY AT MIDNIGHT
+new CronJob('00 00 00 * * *', () => {
+  Goal.update({
+    streak_days: Sequelize.literal('streak_days + 1'),
+    amount_saved: Sequelize.literal('amount_saved + vice_price'),
+  }, {where: {}});
+}, null, true, 'America/Chicago');
 
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
