@@ -15,6 +15,7 @@ const { db, models: {
 }
 } = require('./models/index');
 const { createCustomer } = require('./dbHelpers');
+const { CronJob } = require('cron');
 
 /**
  * load test users, feel free to comment out
@@ -336,6 +337,14 @@ app.get('/user/:auth0_id', (req, res) => {
       console.log('UserId get error:', err);
     });
 });
+
+// CRON JOB/UPDATE AMOUNT SAVED EACH DAY AT MIDNIGHT
+new CronJob('00 00 00 * * *', () => {
+  Goal.update({
+    streak_days: Sequelize.literal('streak_days + 1'),
+    amount_saved: Sequelize.literal('amount_saved + vice_price'),
+  }, {where: {}});
+}, null, true, 'America/Chicago');
 
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
