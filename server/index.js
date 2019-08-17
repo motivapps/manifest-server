@@ -317,6 +317,7 @@ app.post('/user/goals', (req, res) => {
     streak_days: 0,
     goal_name: req.body.goalName,
     goal_item: req.body.goalItem,
+    goal_photo: req.body.goalPhoto,
     goal_cost: req.body.goalAmount,
     amount_saved: 0.00,
     relapse_count: 0,
