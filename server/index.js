@@ -166,33 +166,57 @@ app.post('/transaction_hook', (req, res) => {
       console.error(err);
     } else {
       console.log(transactionRes);
-      // DATABASE WORK HERE
       const itemId = transactionRes.item.item_id;
       // Parse this data, send suspicious transactions to the database
       const { transactions } = transactionRes;
       // loop over transactions to see if any transaction.category array includes "Coffee Shop"
       // if it does, add it to suspicions
-      const suspicions = transactions.filter(transaction => transaction.category.includes('Coffee Shop'));
+      let suspicions = [];
+      let fastFoods = [
+        'McDonald\'s',
+        'KFC',
+        'Burger King'
+      ]
       // find user associated with item_id
       User.findOne({where: {
         item_id: itemId
       }})
         .then((user) => {
-          suspicions.forEach(suspicion => {
-            Transaction.findOrCreate({where: {
-              transaction_id: suspicion.transaction_id
-            },
-            defaults: {
-              id_user: user.id,
-              status: 'pending',
-              name: suspicion.name,
-              day: suspicion.date,
-              amount: suspicion.amount,
-            }
-            });
-          });
-        })
-        .catch(err => console.error(err));
+          Goal.findOne({ where: {id_user: user.id }})
+            .then((goal) => {
+              if (goal.vice === 'Coffee') {
+                suspicions = transactions.filter(transaction => transaction.category.includes('Coffee Shop'));
+              } else if (goal.vice === 'Smoking') {
+                suspicions = transactions.filter(transaction => transaction.category.includes('Tobacco') ||
+                transaction.category.includes('Gas Stations') && transaction.amount < 12 || 
+                transaction.category.includes('Convenience Stores') && transaction.amount < 12);
+              } else {
+                transactions.forEach(transaction => {
+                  if (fastFoods.includes(transaction.name)) {
+                    suspicions.push(transaction);
+                  } 
+                });
+              }
+              return suspicions;
+            })
+            .then((suspicions) => {
+              suspicions.forEach(suspicion => {
+                Transaction.findOrCreate({where: {
+                  transaction_id: suspicion.transaction_id
+                },
+                defaults: {
+                  id_user: user.id,
+                  status: 'pending',
+                  name: suspicion.name,
+                  day: suspicion.date,
+                  amount: suspicion.amount,
+                }
+                });
+              });
+            })
+            .catch(err => console.error(err));
+            })
+            .catch(err => console.error(err));
       // res.json({ transactions: transactionRes });
     }
   });
