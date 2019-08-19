@@ -328,7 +328,7 @@ app.post('/user/goals', (req, res) => {
 
 app.get('/user/:auth0_id', (req, res) => {
   User.findOne({ where: { auth0_id: req.params.auth0_id } })
-    .then((response) => {
+    .then(response => {
       console.log('then response:', response);
       res.status(200).send(response);
     })
@@ -336,6 +336,13 @@ app.get('/user/:auth0_id', (req, res) => {
       console.log('UserId get error:', err);
     });
 });
+
+app.get('/accounts/:auth0_id', (req, res) => {
+  User.findOne({ where: { auth0_id: req.params.auth0_id } })
+    .then(response => {
+      res.status(200).send(response);
+    })
+})
 
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
