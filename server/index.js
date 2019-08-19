@@ -175,14 +175,38 @@ app.post('/transaction_hook', (req, res) => {
       let fastFoods = [
         'McDonald\'s',
         'KFC',
-        'Burger King'
-      ]
+        'Burger King',
+        'Arby\'s',
+        'Carl\'s Jr',
+        'Checker\'s',
+        'Rally\'s',
+        'Chick-fil-A',
+        'Chipotle Mexican Grill',
+        'Church\'s',
+        'Dairy Queen',
+        'In-N-Out Burger',
+        'The Halal Guys',
+        'Jack in the Box',
+        'Jimmy John\'s',
+        'Krystal',
+        'Panera Bread',
+        'Panda Express',
+        'Pita Pit',
+        'Popeyes Chicken & Biscuits',
+        'Raising Cane\'s Chicken Fingers',
+        'Sonic Drive-in',
+        'Steak \'n Shake',
+        'Subway',
+        'Taco Bell',
+        'Wendy\'s',
+        'Zaxby\'s'
+        ]
       // find user associated with item_id
       User.findOne({where: {
         item_id: itemId
       }})
         .then((user) => {
-          Goal.findOne({ where: {id_user: user.id }})
+          Goal.findOne({ where: { id_user: user.id }})
             .then((goal) => {
               if (goal.vice === 'Coffee') {
                 suspicions = transactions.filter(transaction => transaction.category.includes('Coffee Shop'));
@@ -191,11 +215,7 @@ app.post('/transaction_hook', (req, res) => {
                 transaction.category.includes('Gas Stations') && transaction.amount < 12 || 
                 transaction.category.includes('Convenience Stores') && transaction.amount < 12);
               } else {
-                transactions.forEach(transaction => {
-                  if (fastFoods.includes(transaction.name)) {
-                    suspicions.push(transaction);
-                  } 
-                });
+                suspicions = transactions.filter(transaction => fastFoods.includes(transaction.name));
               }
               return suspicions;
             })
