@@ -9,8 +9,6 @@ module.exports = db.define('users', {
   },
   'picture': Sequelize.STRING,
   'access_token': Sequelize.STRING,
-  'account_id_to': Sequelize.STRING,
-  'account_id_from': Sequelize.STRING,
   'item_id': Sequelize.STRING,
   'session_token': Sequelize.STRING,
   'device_token': Sequelize.STRING,
@@ -21,7 +19,6 @@ module.exports = db.define('users', {
   },
   'games': Sequelize.INTEGER,
   'stripe_id': Sequelize.STRING,
-  'accounts': Sequelize.ARRAY(Sequelize.TEXT),
 }, { db }
 );
 // add stripe customer object
