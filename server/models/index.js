@@ -5,6 +5,7 @@ const Relapse = require('./tables/relapses');
 const Transaction = require('./tables/transactions');
 const UserGame = require('./tables/users_games');
 const Vice = require('./tables/vices');
+const Account = require('./tables/accounts');
 
 const db = require('./db');
 
@@ -15,8 +16,12 @@ const models = {
   Relapse,
   Transaction,
   UserGame,
-  Vice
+  Vice,
+  Account,
 };
+
+// create foreign key
+Account.belongsTo(User)
 
 db.authenticate()
   .then(() => {

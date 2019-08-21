@@ -1,4 +1,4 @@
-const { models: { User} } = require('./models/index');
+const { models: { User, Account } } = require('./models/index');
 const axios = require('axios');
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
@@ -13,10 +13,16 @@ module.exports.createCustomer = ( { accounts, numbers: { ach } }, { name, id } )
     
     User.update({
       stripe_customer: customer.id,
-      accounts: mapAccounts(accounts, ach),
     }, {
       where: { id },
     });
+
+    Account.create({
+      user_id: id,
+      routing: ach[0].routing,
+      accounts: mapAccounts(accounts, ach),
+    })
+
   });
 };
 
@@ -28,6 +34,8 @@ const mapAccounts = (accounts, ach) => {
       subtype,
       name,
     };
-    return accounts.concat([JSON.stringify(obj)])
+    return index > ach.length 
+      ? accounts
+      : accounts.concat([JSON.stringify(obj)]);
   }, []);
 };
