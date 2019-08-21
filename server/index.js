@@ -288,14 +288,13 @@ app.get('/goals/:auth0_id', (req, res) => {
 app.post('/pushtoken', (req, res) => {
   console.log('inside pushtoken route');
   console.log('push token req:', req.body);
-  User.update(
-    {device_token: req.body.pushToken},
-    {where: {auth0_id: req.body.authID}
-    })
-    .then((response) => {
+  User.update({
+      device_token: req.body.pushToken
+    }, {
+      where: {auth0_id: req.body.authID}
+    }).then((response) => {
       res.status(201).send(response);
-    })
-    .catch((err) => {
+    }).catch((err) => {
       console.error(err);
     });
 });
@@ -340,9 +339,31 @@ app.get('/user/:auth0_id', (req, res) => {
 app.get('/accounts/:auth0_id', (req, res) => {
   User.findOne({ where: { auth0_id: req.params.auth0_id } })
     .then(response => {
-      res.status(200).send(response);
+      res.status(200).send(response.accounts);
     })
 })
+
+app.post('/accounts/to/:auth0_id', (req, res) => {
+  // const { account_id } = req.body;
+  User.update({
+    account_id_to: account_id
+  }, {
+    where: {
+      auth0_id: req.params.auth0_id,
+    }
+  }).then(async (data) => {
+    // const user = data[0];
+    // client.getAuth(user.access_token, (err, authResponse) => {
+    //   if (err) {
+    //     console.error(err);
+    //   }
+    //   console.log(user);
+
+    //   // createCustomer(authResponse, user);
+    //   res.json({ error: null, auth: authResponse });
+    data;
+  }).catch((err) => console.log(err));
+});
 
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
