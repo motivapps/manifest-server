@@ -11,7 +11,7 @@ const { sequelize, models } = require('./models/index');
 const Sequelize = require('sequelize');
 const moment = require('moment');
 const { db, models: { 
-  Game, Goal, Relapse, Transaction, UsersGame, Vice, User
+  Game, Goal, Relapse, Transaction, UsersGame, Vice, User, Account
 }
 } = require('./models/index');
 const { createCustomer } = require('./dbHelpers');
@@ -144,7 +144,7 @@ app.post('/auth', (req, res) => {
         console.error(err);
       }
       console.log(user);
-  
+
       createCustomer(authResponse, user);
       res.json({ error: null, auth: authResponse });
     });
@@ -338,9 +338,8 @@ app.get('/user/:auth0_id', (req, res) => {
 
 app.get('/accounts/:auth0_id', (req, res) => {
   User.findOne({ where: { auth0_id: req.params.auth0_id } })
-    .then(response => {
-      res.status(200).send(response.accounts);
-    })
+    .then(response =>  Account.findOne({ where: { userId: response.id } }))
+    .then(response => res.status(200).send(response.accounts));
 })
 
 app.post('/accounts/to/:auth0_id', (req, res) => {

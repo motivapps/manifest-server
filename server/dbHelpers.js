@@ -18,7 +18,7 @@ module.exports.createCustomer = ( { accounts, numbers: { ach } }, { name, id } )
     });
 
     Account.create({
-      user_id: id,
+      userId: id,
       routing: ach[0].routing,
       accounts: mapAccounts(accounts, ach),
     })
@@ -34,7 +34,7 @@ const mapAccounts = (accounts, ach) => {
       subtype,
       name,
     };
-    return index > ach.length 
+    return index > ach.length - 1 
       ? accounts
       : accounts.concat([JSON.stringify(obj)]);
   }, []);
