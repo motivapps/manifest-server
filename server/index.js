@@ -115,7 +115,7 @@ app.post('/get_access_token', (req, res, next) => {
     console.log(JSON.stringify(tokenResponse));
     // ADD ACCESS_TOKEN AND ITEM_ID TO DATABASE HERE
     User.update({ 
-      access_token: ACCESS_TOKEN, 
+      access_token: ACCESS_TOKEN,  
       item_id: ITEM_ID 
     }, {
       where: {
