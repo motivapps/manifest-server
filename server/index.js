@@ -11,7 +11,7 @@ const { sequelize, models } = require('./models/index');
 const Sequelize = require('sequelize');
 const moment = require('moment');
 const { db, models: { 
-  Game, Goal, Relapse, Transaction, UsersGame, Vice, User
+  Game, Goal, Relapse, Transaction, UsersGame, Vice, User, Account
 }
 } = require('./models/index');
 const { createCustomer } = require('./dbHelpers');
@@ -116,7 +116,7 @@ app.post('/get_access_token', (req, res, next) => {
     console.log(JSON.stringify(tokenResponse));
     // ADD ACCESS_TOKEN AND ITEM_ID TO DATABASE HERE
     User.update({ 
-      access_token: ACCESS_TOKEN, 
+      access_token: ACCESS_TOKEN,  
       item_id: ITEM_ID 
     }, {
       where: {
@@ -145,7 +145,7 @@ app.post('/auth', (req, res) => {
         console.error(err);
       }
       console.log(user);
-  
+
       createCustomer(authResponse, user);
       res.json({ error: null, auth: authResponse });
     });
@@ -365,14 +365,13 @@ app.patch('/goals/:auth0_id', (req, res) => {
 app.post('/pushtoken', (req, res) => {
   console.log('inside pushtoken route');
   console.log('push token req:', req.body);
-  User.update(
-    {device_token: req.body.pushToken},
-    {where: {auth0_id: req.body.authID}
-    })
-    .then((response) => {
+  User.update({
+      device_token: req.body.pushToken
+    }, {
+      where: {auth0_id: req.body.authID}
+    }).then((response) => {
       res.status(201).send(response);
-    })
-    .catch((err) => {
+    }).catch((err) => {
       console.error(err);
     });
 });
@@ -406,13 +405,41 @@ app.post('/user/goals', (req, res) => {
 
 app.get('/user/:auth0_id', (req, res) => {
   User.findOne({ where: { auth0_id: req.params.auth0_id } })
-    .then((response) => {
+    .then(response => {
       console.log('then response:', response);
       res.status(200).send(response);
     })
     .catch((err) => {
       console.log('UserId get error:', err);
     });
+});
+
+app.get('/accounts/:auth0_id', (req, res) => {
+  User.findOne({ where: { auth0_id: req.params.auth0_id } })
+    .then(response =>  Account.findOne({ where: { userId: response.id } }))
+    .then(response => res.status(200).send(response.accounts));
+})
+
+app.post('/accounts/to/:auth0_id', (req, res) => {
+  // const { account_id } = req.body;
+  User.update({
+    account_id_to: account_id
+  }, {
+    where: {
+      auth0_id: req.params.auth0_id,
+    }
+  }).then(async (data) => {
+    // const user = data[0];
+    // client.getAuth(user.access_token, (err, authResponse) => {
+    //   if (err) {
+    //     console.error(err);
+    //   }
+    //   console.log(user);
+
+    //   // createCustomer(authResponse, user);
+    //   res.json({ error: null, auth: authResponse });
+    data;
+  }).catch((err) => console.log(err));
 });
 
 // CRON JOB/UPDATE AMOUNT SAVED EACH DAY AT MIDNIGHT

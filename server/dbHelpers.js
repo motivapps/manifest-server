@@ -1,8 +1,8 @@
-const { models: { User} } = require('./models/index');
+const { models: { User, Account } } = require('./models/index');
 const axios = require('axios');
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
-module.exports.createCustomer = ( { accounts }, { name, id } ) => {
+module.exports.createCustomer = ( { accounts, numbers: { ach } }, { name, id } ) => {
   stripe.customers.create({
     // set description to user acct type
     // find out where i get savings acct num
@@ -13,21 +13,29 @@ module.exports.createCustomer = ( { accounts }, { name, id } ) => {
     
     User.update({
       stripe_customer: customer.id,
-      accounts: mapAccounts(accounts),
     }, {
       where: { id },
     });
+
+    Account.create({
+      userId: id,
+      routing: ach[0].routing,
+      accounts: mapAccounts(accounts, ach),
+    })
+
   });
 };
 
-const mapAccounts = (array) => {
-  return array.reduce((array, { account_id, name, official_name, subtype }) => {
+const mapAccounts = (accounts, ach) => {
+  return accounts.reduce((accounts, { account_id, name, official_name, subtype }, index) => {
     obj = {
       account_id,
       official_name,
       subtype,
       name,
     };
-    return array.concat([JSON.stringify(obj)])
+    return index > ach.length - 1 
+      ? accounts
+      : accounts.concat([JSON.stringify(obj)]);
   }, []);
 };
