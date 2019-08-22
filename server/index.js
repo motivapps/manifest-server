@@ -159,7 +159,7 @@ app.post('/transaction_hook', (req, res) => {
   // commenting conditional out for now just for testing b/c default updates won't happen with sandbox
 
   // if (req.body.webhook_code === 'DEFAULT_UPDATE') {
-  const startDate = moment().subtract(300, 'days').format('YYYY-MM-DD');
+  const startDate = moment().subtract(50, 'days').format('YYYY-MM-DD');
   const endDate = moment().format('YYYY-MM-DD');
   client.getTransactions(ACCESS_TOKEN, startDate, endDate, { offset: 0 }, (err, transactionRes) => {
     if (err) {
@@ -327,6 +327,38 @@ app.get('/goals/:auth0_id', (req, res) => {
       res.json(goals);
     })
     .catch(err => console.error(err));
+});
+
+app.patch('/goals/:auth0_id', (req, res) => {
+  const {
+    goal_name,
+    goal_item,
+    goal_cost,
+    goal_photo,
+    vice,
+    vice_price,
+    vice_freq
+    } = req.body;
+
+  User.findOne({where: {auth0_id: req.params.auth0_id}})
+  .then((user) => {
+    // use users id to find corresponding transactions
+    return Goal.update({
+      goal_name,
+      goal_item,
+      goal_cost,
+      goal_photo,
+      vice,
+      vice_price,
+      vice_freq,
+    },
+    {where: {id_user: user.id}});
+  })
+  .then((goals) => {
+    res.status(200);
+    res.json(goals);
+  })
+  .catch(err => console.error(err));
 });
 
 
