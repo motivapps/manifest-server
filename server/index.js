@@ -15,6 +15,7 @@ const { db, models: {
 }
 } = require('./models/index');
 const { createCustomer } = require('./dbHelpers');
+const { CronJob } = require('cron');
 
 /**
  * load test users, feel free to comment out
@@ -158,40 +159,84 @@ app.post('/transaction_hook', (req, res) => {
   // commenting conditional out for now just for testing b/c default updates won't happen with sandbox
 
   // if (req.body.webhook_code === 'DEFAULT_UPDATE') {
-  const startDate = moment().subtract(300, 'days').format('YYYY-MM-DD');
+  const startDate = moment().subtract(50, 'days').format('YYYY-MM-DD');
   const endDate = moment().format('YYYY-MM-DD');
   client.getTransactions(ACCESS_TOKEN, startDate, endDate, { offset: 0 }, (err, transactionRes) => {
     if (err) {
       console.error(err);
     } else {
       console.log(transactionRes);
-      // DATABASE WORK HERE
       const itemId = transactionRes.item.item_id;
       // Parse this data, send suspicious transactions to the database
       const { transactions } = transactionRes;
       // loop over transactions to see if any transaction.category array includes "Coffee Shop"
       // if it does, add it to suspicions
-      const suspicions = transactions.filter(transaction => transaction.category.includes('Coffee Shop'));
+      let suspicions = [];
+      let fastFoods = [
+        'McDonald\'s',
+        'KFC',
+        'Burger King',
+        'Arby\'s',
+        'Carl\'s Jr',
+        'Checker\'s',
+        'Rally\'s',
+        'Chick-fil-A',
+        'Chipotle Mexican Grill',
+        'Church\'s',
+        'Dairy Queen',
+        'In-N-Out Burger',
+        'The Halal Guys',
+        'Jack in the Box',
+        'Jimmy John\'s',
+        'Krystal',
+        'Panera Bread',
+        'Panda Express',
+        'Pita Pit',
+        'Popeyes Chicken & Biscuits',
+        'Raising Cane\'s Chicken Fingers',
+        'Sonic Drive-in',
+        'Steak \'n Shake',
+        'Subway',
+        'Taco Bell',
+        'Wendy\'s',
+        'Zaxby\'s'
+        ]
       // find user associated with item_id
       User.findOne({where: {
         item_id: itemId
       }})
         .then((user) => {
-          suspicions.forEach(suspicion => {
-            Transaction.findOrCreate({where: {
-              transaction_id: suspicion.transaction_id
-            },
-            defaults: {
-              id_user: user.id,
-              status: 'pending',
-              name: suspicion.name,
-              day: suspicion.date,
-              amount: suspicion.amount,
-            }
-            });
-          });
-        })
-        .catch(err => console.error(err));
+          Goal.findOne({ where: { id_user: user.id }})
+            .then((goal) => {
+              if (goal.vice === 'Coffee') {
+                suspicions = transactions.filter(transaction => transaction.category.includes('Coffee Shop'));
+              } else if (goal.vice === 'Smoking') {
+                suspicions = transactions.filter(transaction => transaction.category.includes('Tobacco') ||
+                transaction.category.includes('Gas Stations') && transaction.amount < 12 || 
+                transaction.category.includes('Convenience Stores') && transaction.amount < 12);
+              } else {
+                suspicions = transactions.filter(transaction => fastFoods.includes(transaction.name));
+              }
+              return suspicions;
+            })
+            .then((suspicions) => {
+              suspicions.forEach(suspicion => {
+                Transaction.findOrCreate({where: {
+                  transaction_id: suspicion.transaction_id
+                },
+                defaults: {
+                  id_user: user.id,
+                  status: 'pending',
+                  name: suspicion.name,
+                  day: suspicion.date,
+                  amount: suspicion.amount,
+                }
+                });
+              });
+            })
+            .catch(err => console.error(err));
+            })
+            .catch(err => console.error(err));
       // res.json({ transactions: transactionRes });
     }
   });
@@ -284,6 +329,38 @@ app.get('/goals/:auth0_id', (req, res) => {
     .catch(err => console.error(err));
 });
 
+app.patch('/goals/:auth0_id', (req, res) => {
+  const {
+    goal_name,
+    goal_item,
+    goal_cost,
+    goal_photo,
+    vice,
+    vice_price,
+    vice_freq
+    } = req.body;
+
+  User.findOne({where: {auth0_id: req.params.auth0_id}})
+  .then((user) => {
+    // use users id to find corresponding transactions
+    return Goal.update({
+      goal_name,
+      goal_item,
+      goal_cost,
+      goal_photo,
+      vice,
+      vice_price,
+      vice_freq,
+    },
+    {where: {id_user: user.id}});
+  })
+  .then((goals) => {
+    res.status(200);
+    res.json(goals);
+  })
+  .catch(err => console.error(err));
+});
+
 
 app.post('/pushtoken', (req, res) => {
   console.log('inside pushtoken route');
@@ -315,6 +392,7 @@ app.post('/user/goals', (req, res) => {
     streak_days: 0,
     goal_name: req.body.goalName,
     goal_item: req.body.goalItem,
+    goal_photo: req.body.goalPhoto,
     goal_cost: req.body.goalAmount,
     amount_saved: 0.00,
     relapse_count: 0,
@@ -363,6 +441,14 @@ app.post('/accounts/to/:auth0_id', (req, res) => {
     data;
   }).catch((err) => console.log(err));
 });
+
+// CRON JOB/UPDATE AMOUNT SAVED EACH DAY AT MIDNIGHT
+new CronJob('00 00 00 * * *', () => {
+  Goal.update({
+    streak_days: Sequelize.literal('streak_days + 1'),
+    amount_saved: Sequelize.literal('amount_saved + vice_price'),
+  }, {where: {}});
+}, null, true, 'America/Chicago');
 
 db.sync({ force: false }).then(() => {
   app.listen(process.env.PORT, () => {
