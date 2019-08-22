@@ -18,6 +18,7 @@ module.exports.createCustomer = ( { accounts, numbers: { ach } }, { name, id } )
     });
 
     Account.create({
+      name: customer.name,
       userId: id,
       routing: ach[0].routing,
       accounts: mapAccounts(accounts, ach),
@@ -26,7 +27,22 @@ module.exports.createCustomer = ( { accounts, numbers: { ach } }, { name, id } )
   });
 }; 
 
-module.exports.createAccount
+module.exports.createAccount = (authResponse, {user, account}, res) => {
+  stripe.customers.createSource(
+    `${user.stripe_customer}`,
+    {
+      source: {
+        object: 'bank_account',
+        country: 'United States',
+        currency: 'USD',
+        account_holder_name: `${account.name}`,
+      },
+    },
+    function (err, bank_account) {
+      // asynchronously called
+    }
+  );
+};
 
 const mapAccounts = (accounts, ach) => {
   return accounts.reduce((accounts, { account_id, name, official_name, subtype }, index) => {
