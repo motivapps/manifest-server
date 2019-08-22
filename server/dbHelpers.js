@@ -24,7 +24,9 @@ module.exports.createCustomer = ( { accounts, numbers: { ach } }, { name, id } )
     })
 
   });
-};
+}; 
+
+module.exports.createAccount
 
 const mapAccounts = (accounts, ach) => {
   return accounts.reduce((accounts, { account_id, name, official_name, subtype }, index) => {
