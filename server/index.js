@@ -14,7 +14,7 @@ const { db, models: {
   Game, Goal, Relapse, Transaction, UsersGame, Vice, User, Account
 }
 } = require('./models/index');
-const { createCustomer } = require('./dbHelpers');
+const { createCustomer, createAccount } = require('./dbHelpers');
 const { CronJob } = require('cron');
 
 /**
@@ -439,18 +439,19 @@ app.post('/accounts/assign/:auth0_id', (req, res) => {
           where: { userId: id },
         })
       }
-    }).then(({
-      user: { access_token, stripe_customer }, account: { routing, account_id_to, account_id_from }}) => {
-      const user = data[0];
+    }).then((data) => {
+      const { access_token } = data.user;
       client.getAuth(access_token, (err, authResponse) => {
         if (err) {
           console.error(err);
+          res.status(500).end()
         }
         console.log(user);
 
-        // createCustomer(authResponse, user);
+        createAccount(authResponse, data, res);
         // res.status().end();
-  }).catch((err) => console.log(err));
+      })
+    }).catch((err) => console.log(err));
 });
 
 // CRON JOB/UPDATE AMOUNT SAVED EACH DAY AT MIDNIGHT
