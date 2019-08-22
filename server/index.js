@@ -416,29 +416,40 @@ app.get('/user/:auth0_id', (req, res) => {
 
 app.get('/accounts/:auth0_id', (req, res) => {
   User.findOne({ where: { auth0_id: req.params.auth0_id } })
-    .then(response =>  Account.findOne({ where: { userId: response.id } }))
-    .then(response => res.status(200).send(response.accounts));
+    .then(({ id }) =>  Account.findOne({ where: { userId: id } }))
+    .then(({ accounts }) => res.status(200).send(accounts));
 })
 
-app.post('/accounts/to/:auth0_id', (req, res) => {
-  // const { account_id } = req.body;
-  User.update({
-    account_id_to: account_id
-  }, {
-    where: {
-      auth0_id: req.params.auth0_id,
-    }
-  }).then(async (data) => {
-    // const user = data[0];
-    // client.getAuth(user.access_token, (err, authResponse) => {
-    //   if (err) {
-    //     console.error(err);
-    //   }
-    //   console.log(user);
+app.post('/accounts/assign/:auth0_id', (req, res) => {
+  const { auth0_id } = req.params;
+  const { to, from } = req.body
+  User.findOne({ where: { auth0_id: auth0_id } })
+    .then(({ id }) => {
+      Account.update({
+        account_id_to: to,
+        account_id_from: from,
+      }, { 
+        where: { userId: id } 
+      })
+      return {
+        user: User.findOne({
+          where: { auth0_id: userToken },
+        }),
+        account: Account.findOne({
+          where: { userId: id },
+        })
+      }
+    }).then(({
+      user: { access_token, stripe_customer }, account: { routing, account_id_to, account_id_from }}) => {
+      const user = data[0];
+      client.getAuth(access_token, (err, authResponse) => {
+        if (err) {
+          console.error(err);
+        }
+        console.log(user);
 
-    //   // createCustomer(authResponse, user);
-    //   res.json({ error: null, auth: authResponse });
-    data;
+        // createCustomer(authResponse, user);
+        // res.status().end();
   }).catch((err) => console.log(err));
 });
 
