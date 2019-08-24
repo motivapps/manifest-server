@@ -423,7 +423,7 @@ new CronJob('00 00 00 * * *', () => {
   }, {where: {}});
 }, null, true, 'America/Chicago');
 
-db.sync({ force: false }).then(() => {
+db.sync({ force: true }).then(() => {
   app.listen(process.env.PORT, () => {
     console.log(`Your app is manifesting on port ${process.env.PORT}!`);
   });
