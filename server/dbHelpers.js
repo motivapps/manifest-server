@@ -18,7 +18,7 @@ module.exports.createCustomer = ( { accounts, numbers: { ach } }, { name, id } )
     });
 
     Account.create({
-      name: customer.name,
+      name: customer.description,
       userId: id,
       routing: ach[0].routing,
       accounts: mapAccounts(accounts, ach),
@@ -28,21 +28,44 @@ module.exports.createCustomer = ( { accounts, numbers: { ach } }, { name, id } )
 }; 
 
 module.exports.createAccount = (authResponse, {user, account}, res) => {
+
+  Account.update({
+    account_id_to: account.account_id_to,
+    account_id_from: account.account_id_from
+  }, {
+    where: { userId: user.id }
+  });
+
+  console.log('acc num', accIdtoNumber(account.account_id_from, authResponse))
+
   stripe.customers.createSource(
-    `${user.stripe_customer}`,
+    user.stripe_customer,
     {
       source: {
         object: 'bank_account',
-        country: 'United States',
-        currency: 'USD',
+        country: 'US',
+        currency: 'usd',
         account_holder_name: `${account.name}`,
+        account_holder_type: 'individual',
+        routing_number: `${account.routing}`,
+        account_number: accIdtoNumber(account.account_id_from, authResponse),
       },
     },
     function (err, bank_account) {
       // asynchronously called
+      console.log('accFROM', bank_account);
     }
   );
 };
+
+const accIdtoNumber = (id, { numbers: { ach } } ) => {
+  // use ach to get real account num
+  return ach.reduce((result, { account_id, account }, ind) => {
+    return id === account_id 
+      ? account 
+      : result;
+  }, '');
+}
 
 const mapAccounts = (accounts, ach) => {
   return accounts.reduce((accounts, { account_id, name, official_name, subtype }, index) => {
