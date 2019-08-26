@@ -424,7 +424,7 @@ app.post('/accounts/assign/:auth0_id', (req, res) => {
   const { auth0_id } = req.params;
   const { to, from } = req.body
   User.findOne({ where: { auth0_id: auth0_id } })
-    .then(({ id }) => {
+    .then( async ({ id }) => {
       Account.update({
         account_id_to: to,
         account_id_from: from,
@@ -432,24 +432,24 @@ app.post('/accounts/assign/:auth0_id', (req, res) => {
         where: { userId: id } 
       })
       return {
-        user: User.findOne({
-          where: { auth0_id: userToken },
+        user: await User.findOne({
+          where: { auth0_id: auth0_id },
         }),
-        account: Account.findOne({
+        account: await Account.findOne({
           where: { userId: id },
         })
       }
     }).then((data) => {
-      const { access_token } = data.user;
+      const { user: { access_token } } = data;
       client.getAuth(access_token, (err, authResponse) => {
         if (err) {
           console.error(err);
           res.status(500).end()
         }
-        console.log(user);
 
+        
         createAccount(authResponse, data, res);
-        // res.status().end();
+        res.status(201).end();
       })
     }).catch((err) => console.log(err));
 });
