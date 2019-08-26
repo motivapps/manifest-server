@@ -361,6 +361,10 @@ app.patch('/goals/:auth0_id', (req, res) => {
   .catch(err => console.error(err));
 });
 
+/**
+ * Stores pushtoken for currently logged in user in users table. Having a pushtoken allows 
+ * user to receive push notifications.
+ */
 
 app.post('/pushtoken', (req, res) => {
   console.log('inside pushtoken route');
@@ -375,6 +379,11 @@ app.post('/pushtoken', (req, res) => {
       console.error(err);
     });
 });
+
+/**
+ * Stores goal to goals table and calculates daily savings based on vice price and frequency
+ * of vice purchase.  Goal is stored using userID to assign goal to correct user.
+ */
 
 app.post('/user/goals', (req, res) => {
   let dailySavings;
