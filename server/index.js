@@ -14,7 +14,7 @@ const { db, models: {
   Game, Goal, Relapse, Transaction, UsersGame, Vice, User, Account
 }
 } = require('./models/index');
-const { createCustomer } = require('./dbHelpers');
+const { createCustomer, createAccount } = require('./dbHelpers');
 const { CronJob } = require('cron');
 
 /**
@@ -361,6 +361,10 @@ app.patch('/goals/:auth0_id', (req, res) => {
   .catch(err => console.error(err));
 });
 
+/**
+ * Stores pushtoken for currently logged in user in users table. Having a pushtoken allows 
+ * user to receive push notifications.
+ */
 
 app.post('/pushtoken', (req, res) => {
   console.log('inside pushtoken route');
@@ -375,6 +379,11 @@ app.post('/pushtoken', (req, res) => {
       console.error(err);
     });
 });
+
+/**
+ * Stores goal to goals table and calculates daily savings based on vice price and frequency
+ * of vice purchase.  Goal is stored using userID to assign goal to correct user.
+ */
 
 app.post('/user/goals', (req, res) => {
   let dailySavings;
@@ -444,30 +453,42 @@ app.get('/user/:auth0_id', (req, res) => {
 
 app.get('/accounts/:auth0_id', (req, res) => {
   User.findOne({ where: { auth0_id: req.params.auth0_id } })
-    .then(response =>  Account.findOne({ where: { userId: response.id } }))
-    .then(response => res.status(200).send(response.accounts));
+    .then(({ id }) =>  Account.findOne({ where: { userId: id } }))
+    .then(({ accounts }) => res.status(200).send(accounts));
 })
 
-app.post('/accounts/to/:auth0_id', (req, res) => {
-  // const { account_id } = req.body;
-  User.update({
-    account_id_to: account_id
-  }, {
-    where: {
-      auth0_id: req.params.auth0_id,
-    }
-  }).then(async (data) => {
-    // const user = data[0];
-    // client.getAuth(user.access_token, (err, authResponse) => {
-    //   if (err) {
-    //     console.error(err);
-    //   }
-    //   console.log(user);
+app.post('/accounts/assign/:auth0_id', (req, res) => {
+  const { auth0_id } = req.params;
+  const { to, from } = req.body
+  User.findOne({ where: { auth0_id: auth0_id } })
+    .then( async ({ id }) => {
+      Account.update({
+        account_id_to: to,
+        account_id_from: from,
+      }, { 
+        where: { userId: id } 
+      })
+      return {
+        user: await User.findOne({
+          where: { auth0_id: auth0_id },
+        }),
+        account: await Account.findOne({
+          where: { userId: id },
+        })
+      }
+    }).then((data) => {
+      const { user: { access_token } } = data;
+      client.getAuth(access_token, (err, authResponse) => {
+        if (err) {
+          console.error(err);
+          res.status(500).end()
+        }
 
-    //   // createCustomer(authResponse, user);
-    //   res.json({ error: null, auth: authResponse });
-    data;
-  }).catch((err) => console.log(err));
+        
+        createAccount(authResponse, data, res);
+        res.status(201).end();
+      })
+    }).catch((err) => console.log(err));
 });
 
 // CRON JOB/UPDATE AMOUNT SAVED EACH DAY AT MIDNIGHT
