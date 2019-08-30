@@ -395,21 +395,49 @@ app.post('/user/goals', (req, res) => {
   } else if (req.body.viceFrequency === 'Once Per Week') {
     dailySavings = (vicePrice / 7).toFixed(2);
   }
-  Goal.create({ 
-    id_user: req.body.userId,
-    vice: req.body.viceName,
-    streak_days: 0,
-    goal_name: req.body.goalName,
-    goal_item: req.body.goalItem,
-    goal_photo: req.body.goalPhoto,
-    goal_cost: req.body.goalAmount,
-    amount_saved: 0.00,
-    relapse_count: 0,
-    relapse_cost_total: 0,
-    vice_freq: req.body.viceFrequency,
-    vice_price: req.body.vicePrice,
-    daily_savings: dailySavings,
-  });
+  Goal.findOne({ where: { id_user: req.body.userId }})
+    .then((goal) => {
+      if (goal) {
+        Goal.destroy({
+          where: {
+            id_user: req.body.userId,
+          }
+        })
+        .then(() => {
+          Goal.create({ 
+            id_user: req.body.userId,
+            vice: req.body.viceName,
+            streak_days: 0,
+            goal_name: req.body.goalName,
+            goal_item: req.body.goalItem,
+            goal_photo: req.body.goalPhoto,
+            goal_cost: req.body.goalAmount,
+            amount_saved: 0.00,
+            relapse_count: 0,
+            relapse_cost_total: 0,
+            vice_freq: req.body.viceFrequency,
+            vice_price: req.body.vicePrice,
+            daily_savings: dailySavings,
+          });
+        })
+      } else {
+        Goal.create({ 
+          id_user: req.body.userId,
+          vice: req.body.viceName,
+          streak_days: 0,
+          goal_name: req.body.goalName,
+          goal_item: req.body.goalItem,
+          goal_photo: req.body.goalPhoto,
+          goal_cost: req.body.goalAmount,
+          amount_saved: 0.00,
+          relapse_count: 0,
+          relapse_cost_total: 0,
+          vice_freq: req.body.viceFrequency,
+          vice_price: req.body.vicePrice,
+          daily_savings: dailySavings,
+        });
+      }
+    }) 
 });
 
 app.get('/user/:auth0_id', (req, res) => {
